@@ -2,12 +2,17 @@ using KSP.Localization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using System.Text;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace PartInfoInPAW
 {
 	public class ModulePartInfoInPAW : PartModule
 	{
+		#region GUI: Fields
+
 		[KSPField(isPersistant = true)]
 		public bool showTWR = true;
 
@@ -21,7 +26,7 @@ namespace PartInfoInPAW
 		public string partName = "";
 
 		[KSPField(isPersistant = false, guiActiveEditor = true, guiActive = false, guiName = "#LOC_PartInfoInPAW_PartMod_Title", groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
-		public string partMod = "";
+		public string partModName = "";
 
 		[KSPField(isPersistant = false, guiActiveEditor = false, guiActive = false, guiName = "#LOC_PartInfoInPAW_PartCFGPath_Title", groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
 		public string partCFGPath = "";
@@ -50,33 +55,143 @@ namespace PartInfoInPAW
 		[KSPField(isPersistant = false, guiActiveEditor = true, guiActive = false, guiName = "#LOC_PartInfoInPAW_Info_Title", groupName = "engine2Info", groupDisplayName = "#LOC_PartInfoInPAW_Engine2Info_GroupTitle")]
 		public string engine2Info = "";
 
+		#endregion GUI: Fields
+
+		#region GUI: Buttons
+
 		[KSPEvent(guiActive = false, guiActiveEditor = true, guiName = "#LOC_PartInfoInPAW_CopyPartName_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
 		public void CopyPartName()
 		{
-			if (partName == "")
+			try
 			{
-				partName = GetPartName();
+				if (partName == "")
+				{
+					partName = GetPartName();
+				}
+				GUIUtility.systemCopyBuffer = partName;
+				Utils.Log($"Part {part.partInfo.name} : ID copied to clipboard");
+				Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboard_PartID_SuccessMsg", partName), 2.0f);
 			}
-			GUIUtility.systemCopyBuffer = partName;
-			Debug.Log(String.Format($"[PartInfoInPAW] Part {part.partInfo.name} : ID copied to clipboard"));
-			ScreenMessages.PostScreenMessage(new ScreenMessage(
-			  Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboardMsg_PartID_Success", partName),
-			  2.0f, ScreenMessageStyle.UPPER_CENTER));
+			catch(Exception e)
+			{
+				Utils.LogError($"Part {part.partInfo.name} : failed to copy part ID to clipboard: " + e.Message);
+				Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboard_PartID_FailureMsg", partName));
+			}
 		}
 
 		[KSPEvent(guiActive = false, guiActiveEditor = true, guiName = "#LOC_PartInfoInPAW_CopyPartNode_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
 		public void CopyPartConfigNode()
 		{
-			GUIUtility.systemCopyBuffer = GetConfigNodeText();
+			string partCFG;
+			try
+			{
+				partCFG = GetConfigNodeText();
+			}
+			catch (Exception e)
+			{
+				Utils.LogError(e.Message);
+				Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_GetNode_PartCFG_FailureMsg", partName));
+				return;
+			}
+			try
+			{
+				GUIUtility.systemCopyBuffer = partCFG;
+				Utils.Log($"Part {part.partInfo.name} : CFG node copied to clipboard");
+				Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboard_PartCFG_SuccessMsg", partName), 2.0f);
+			}
+			catch (Exception e)
+			{
+				Utils.LogError($"Part {part.partInfo.name} : failed to copy CFG node to clipboard: " + e.Message);
+				Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboard_PartCFG_FailureMsg", partName));
+			}
 		}
+
+		[KSPEvent(guiActive = false, guiActiveEditor = true, guiName = "#LOC_PartInfoInPAW_OpenPartCFGInEditor_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
+		public void OpenPartCFGInEditor()
+		{
+			string partCFG;
+			try
+			{
+				partCFG = GetConfigNodeText();
+			}
+			catch (Exception e)
+			{
+				Utils.LogError(e.Message);
+				Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_GetNode_PartCFG_FailureMsg", partName));
+				return;
+			}
+			string fileName = partName;
+			if (fileName == "")
+			{
+				fileName = GetPartName();
+			}
+			foreach (var c in Path.GetInvalidFileNameChars())
+			{
+				fileName = fileName.Replace(c, '-');
+			}
+			string filePath = Path.Combine(Path.GetTempPath(), Process.GetCurrentProcess().Id.ToString() + "_" + fileName + ".cfg");
+			if (!File.Exists(filePath))
+			{
+				try
+				{
+					File.WriteAllText(filePath, partCFG, Encoding.UTF8);
+				}
+				catch (Exception e)
+				{
+					Utils.LogError($"Could not write part CFG to file {filePath}: " + e.Message);
+					Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_CantWriteToTempFile_PartCFG_FailureMsg", filePath));
+					return;
+				}
+			}
+			Utils.ShellOpenFile(filePath);
+		}
+
+		[KSPEvent(guiActive = false, guiActiveEditor = true, guiName = "#LOC_PartInfoInPAW_CopyOrigPartNode_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
+		public void CopyOrigPartConfigNode()
+		{
+			string origFilePath = Utils.GetPartFilePath(part);
+			string origFileContent;
+			try
+			{
+				origFileContent = File.ReadAllText(origFilePath);
+			}
+			catch (Exception e)
+			{
+				Utils.LogError($"Could not read part CFG file {origFilePath}: " + e.Message);
+				Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_OpenFile_PartOrigFile_FailureMsg", origFilePath));
+				return;
+			}
+			try
+			{
+				GUIUtility.systemCopyBuffer = origFileContent;
+				Utils.Log($"Part {part.partInfo.name} : CFG file {origFilePath.Replace('\\', '/')} copied to clipboard");
+				Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboard_PartOrigFile_SuccessMsg", partName), 2.0f);
+			}
+			catch (Exception e)
+			{
+				Utils.LogError($"Part {part.partInfo.name} : failed to copy original CFG file to clipboard: " + e.Message);
+				Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboard_PartOrigFile_FailureMsg", partName));
+			}
+		}
+
+		[KSPEvent(guiActive = false, guiActiveEditor = true, guiName = "#LOC_PartInfoInPAW_OpenOrigPartCFGInEditor_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
+		public void OpenOrigPartCFGInEditor()
+		{
+			Utils.ShellOpenFile(Utils.GetPartFilePath(part));
+		}
+
+		#endregion GUI: Buttons
+
 
 		protected ModuleEngines engine1;
 		protected ModuleEngines engine2;
 
-		public struct ModWithComplexFoldersStruct
+		protected bool InfoUpdated = false;
+
+		public readonly struct ModWithComplexFoldersStruct
 		{
-			private string ModFolder;
-			private int NestingLevel;
+			private readonly string ModFolder;
+			private readonly int NestingLevel;
 
 			public ModWithComplexFoldersStruct(string folder, int nestLevel = 2)
 			{
@@ -113,15 +228,13 @@ namespace PartInfoInPAW
 			}
 		}
 
-		protected List<ModWithComplexFoldersStruct> ModsWithComplexFoldersStruct = new List<ModWithComplexFoldersStruct>()
+		protected static List<ModWithComplexFoldersStruct> ModsWithComplexFoldersStruct = new List<ModWithComplexFoldersStruct>()
 		{
 			new ModWithComplexFoldersStruct("SquadExpansion"),
 			new ModWithComplexFoldersStruct("UmbraSpaceIndustries"),
 			new ModWithComplexFoldersStruct("WildBlueIndustries"),
 			new ModWithComplexFoldersStruct("Bluedog_DB", 3),
 		};
-
-		protected bool InfoUpdated = false;
 
 		private void Start()
 		{
@@ -161,9 +274,9 @@ namespace PartInfoInPAW
 			{
 				partName = GetPartName();
 			}
-			if (partMod == "")
+			if (partModName == "")
 			{
-				partMod = GetPartMod();
+				partModName = GetPartModName();
 			}
 			ModuleEngines[] engines;
 			MultiModeEngine[] isMultimode;
@@ -177,13 +290,13 @@ namespace PartInfoInPAW
 			{
 				// Dry mass only
 				Fields["partMass"].guiName = Localizer.Format("#LOC_PartInfoInPAW_PartDryMass_Title");
-				partMass = FormatMass(dryMass);
+				partMass = Utils.FormatMass(dryMass);
 			}
 			else
 			{
 				// Dry mass / wet mass
 				Fields["partMass"].guiName = Localizer.Format("#LOC_PartInfoInPAW_PartDryWetMass_Title");
-				partMass = FormatMass(dryMass) + " / " + FormatMass(wetMass);
+				partMass = Utils.FormatMass(dryMass) + " / " + Utils.FormatMass(wetMass);
 			}
 
 			partCost = part.partInfo.cost + part.GetModuleCosts(part.partInfo.cost);
@@ -234,20 +347,6 @@ namespace PartInfoInPAW
 			InfoUpdated = true;
 		}
 
-		private string FormatMass(float mass)
-		{
-			string result;
-			if (mass < 1.0f)
-			{
-				result = (mass * 1000.0f).ToString("F0") + " " + Localizer.Format("#LOC_PartInfoInPAW_Kg_Unit");
-			}
-			else
-			{
-				result = mass.ToString("F3") + " " + Localizer.Format("#LOC_PartInfoInPAW_T_Unit");
-			}
-			return result;
-		}
-
 		private string GetPartName()
 		{
 			string pName = "";
@@ -256,14 +355,14 @@ namespace PartInfoInPAW
 				pName = GameDatabase.Instance.GetConfigs("PART").
 					Single(c => part.partInfo.name.Replace('_', '.') == c.name.Replace('_', '.')).name;
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
-				Debug.LogError(String.Format($"[PartInfoInPAW] Couldn't get config value name for part {part.partInfo.name}"));
+				Utils.LogError($"Couldn't get config value name for part {part.partInfo.name}: " + e.Message);
 			}
 			return pName;
 		}
 
-		private string GetPartMod()
+		private string GetPartModName()
 		{
 			string url = part.partInfo.partUrl;
 			foreach (var mod in ModsWithComplexFoldersStruct)
@@ -278,49 +377,29 @@ namespace PartInfoInPAW
 
 		private string GetConfigNodeText()
 		{
-			string node = "";
+			ConfigNode cfg;
 			try
 			{
-				ConfigNode cfg = GameDatabase.Instance.GetConfigNode(part.partInfo.partUrl);
-				if (cfg == null)
-				{
-					cfg = part.partInfo.partConfig;
-				}
-				if (cfg != null)
-				{
-					node = cfg.ToString();
-					if (cfg != null && !cfg.HasValue("name") && (partName != ""))
-					{
-						node = ReplaceFirstOccurrence(node, "{", "{" + $"{Environment.NewLine}\tname = {partName}");
-						Debug.Log(String.Format($"[PartInfoInPAW] Part {part.partInfo.name} : CFG node copied to clipboard"));
-						ScreenMessages.PostScreenMessage(new ScreenMessage(
-						  Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboardMsg_PartCFG_Success", partName),
-						  2.0f, ScreenMessageStyle.UPPER_CENTER));
-					}
-				}
-				else
-				{
-					Debug.LogError(String.Format($"[PartInfoInPAW] Couldn't get config node for part {part.partInfo.name}"));
-					ScreenMessages.PostScreenMessage(new ScreenMessage(
-					  Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboardMsg_PartCFG_Failure", partName),
-					  3.0f, ScreenMessageStyle.UPPER_CENTER));
-				}
+				cfg = GameDatabase.Instance.GetConfigNode(part.partInfo.partUrl) ?? part.partInfo.partConfig;
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
-				Debug.LogError(String.Format($"[PartInfoInPAW] Couldn't get config node for part {part.partInfo.name}"));
-				ScreenMessages.PostScreenMessage(new ScreenMessage(
-				  Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboardMsg_PartCFG_Failure", partName),
-				  3.0f, ScreenMessageStyle.UPPER_CENTER));
+				throw new Exception($"Couldn't get config node for part {part.partInfo.name}: " + e.Message);
 			}
-			return node;
-		}
-
-		public static string ReplaceFirstOccurrence(string Source, string Find, string Replace)
-		{
-			int Place = Source.IndexOf(Find);
-			string result = Source.Remove(Place, Find.Length).Insert(Place, Replace);
-			return result;
+			string nodeText;
+			if (cfg != null)
+			{
+				nodeText = cfg.ToString();
+				if (cfg != null && !cfg.HasValue("name") && (partName != ""))
+				{
+					nodeText = Utils.ReplaceFirstOccurrence(nodeText, "{", "{" + $"{Environment.NewLine}\tname = {partName}");
+				}
+			}
+			else
+			{
+				throw new Exception($"Couldn't get config node for part {part.partInfo.name}: CFG node is null for some reason");
+			}
+			return nodeText;
 		}
 
 		public override string GetInfo()
@@ -342,10 +421,14 @@ namespace PartInfoInPAW
 			return Localizer.Format("#LOC_PartInfoInPAW_PartModuleInfo", partName, partURL);
 		}
 
+		#region B9PartSwitch API
+
 		[KSPEvent]
 		public void ModuleDataChanged(BaseEventDetails details)
 		{
 			InfoUpdated = false;
 		}
+
+		#endregion B9PartSwitch API
 	}
 }
