@@ -2,15 +2,24 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using UnityEngine;
 
 namespace PartInfoInPAW
 {
 	public static class Utils
 	{
+		public const bool LogDebugMsgs = true;
+
 		public static void Log(string msg)
 		{
 			UnityEngine.Debug.Log("[PartInfoInPAW] " + msg);
+		}
+
+		public static void LogDebugMsg(string msg)
+		{
+			if (LogDebugMsgs)
+			{
+				UnityEngine.Debug.Log("[PartInfoInPAW] [DEBUG] " + msg);
+			}
 		}
 
 		public static void LogWarning(string msg)
@@ -47,10 +56,10 @@ namespace PartInfoInPAW
 			{
 				origFilePath = origFilePath.Replace('/', Path.DirectorySeparatorChar);
 			}
-			origFilePath += ".cfg";
+			origFilePath += "." + UrlDir.configExtension;
 			return Path.Combine(gameDataPath, origFilePath);
 		}
-
+		
 		public static void ShellOpenFile(string filePath)
 		{
 			ProcessStartInfo procInfo = new ProcessStartInfo

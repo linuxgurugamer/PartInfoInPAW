@@ -1,10 +1,10 @@
 using KSP.Localization;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Text;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 
 namespace PartInfoInPAW
@@ -21,6 +21,9 @@ namespace PartInfoInPAW
 
 		[KSPField(isPersistant = true)]
 		public bool showInfoInFlight = false;
+
+		[KSPField(isPersistant = true)]
+		public bool startCollapsed = true;
 
 		[KSPField(isPersistant = false, guiActiveEditor = true, guiActive = false, guiName = "#LOC_PartInfoInPAW_PartName_Title", groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
 		public string partName = "";
@@ -72,7 +75,7 @@ namespace PartInfoInPAW
 				Utils.Log($"Part {part.partInfo.name} : ID copied to clipboard");
 				Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboard_PartID_SuccessMsg", partName), 2.0f);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				Utils.LogError($"Part {part.partInfo.name} : failed to copy part ID to clipboard: " + e.Message);
 				Utils.OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_CopyToClipboard_PartID_FailureMsg", partName));
@@ -110,6 +113,8 @@ namespace PartInfoInPAW
 		public void OpenPartCFGInEditor()
 		{
 			string partCFG;
+
+			ConfigNode cfg = GameDatabase.Instance.GetConfigNode(part.partInfo.partUrl) ?? part.partInfo.partConfig;
 			try
 			{
 				partCFG = GetConfigNodeText();
@@ -129,7 +134,7 @@ namespace PartInfoInPAW
 			{
 				fileName = fileName.Replace(c, '-');
 			}
-			string filePath = Path.Combine(Path.GetTempPath(), Process.GetCurrentProcess().Id.ToString() + "_" + fileName + ".cfg");
+			string filePath = Path.Combine(Path.GetTempPath(), Process.GetCurrentProcess().Id.ToString() + "_" + fileName + "." + UrlDir.configExtension);
 			if (!File.Exists(filePath))
 			{
 				try
@@ -178,6 +183,12 @@ namespace PartInfoInPAW
 		public void OpenOrigPartCFGInEditor()
 		{
 			Utils.ShellOpenFile(Utils.GetPartFilePath(part));
+		}
+
+		[KSPEvent(guiActive = false, guiActiveEditor = true, guiName = "#LOC_PartInfoInPAW_ShowPartMMPatchesHistory_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
+		public void ShowMMPatchesHistory()
+		{
+			MMPatchesHistoryDialog.ShowDialog(partName, part.partInfo.title);
 		}
 
 		#endregion GUI: Buttons
@@ -239,10 +250,18 @@ namespace PartInfoInPAW
 		private void Start()
 		{
 			GameEvents.onEditorShipModified.Add(EditorShipModified);
+
 			Fields["partTemperature"].guiActive = showInfoInFlight;
 			Fields["partSkinTemperature"].guiActive = showInfoInFlight;
-			Events["CopyPartName"].guiActive = showInfoInFlight;
-			Events["CopyPartConfigNode"].guiActive = showInfoInFlight;
+			foreach (BaseField baseField in Fields)
+			{
+				baseField.group.startCollapsed = startCollapsed;
+			}
+			foreach (BaseEvent baseEvent in Events)
+			{
+				baseEvent.group.startCollapsed = startCollapsed;
+				baseEvent.guiActive = showInfoInFlight;
+			}
 		}
 
 		private void OnDestroy()
@@ -417,7 +436,7 @@ namespace PartInfoInPAW
 			{
 				Array.Resize(ref urlSegments, urlSegments.Length - 1);
 			}
-			string partURL = String.Join("<color=#a0a0a0>/</color><br>", urlSegments) + ".cfg";
+			string partURL = String.Join("<color=#a0a0a0>/</color><br>", urlSegments) + "." + UrlDir.configExtension;
 			return Localizer.Format("#LOC_PartInfoInPAW_PartModuleInfo", partName, partURL);
 		}
 
