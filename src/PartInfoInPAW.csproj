@@ -36,10 +36,14 @@
   </PropertyGroup>
   <Import Project="UserConfigEnv.xml" />
   <ItemGroup>
-    <Compile Include="GUI\MMPatchesHistoryDialog.cs" />
+    <Compile Include="GameSettings.cs" />
+    <Compile Include="GUI\MMPatchesCollapseExpandGUIButton.cs" />
+    <Compile Include="GUI\MMPatchesPatchGUILabel.cs" />
     <Compile Include="MMLogParser.cs" />
+    <Compile Include="PartInfoInPAW.cs" />
     <Compile Include="Utils.cs" />
-    <Compile Include="Modules\PartInfoInPAW.cs" />
+    <Compile Include="GUI\MMPatchesHistoryDialog.cs" />
+    <Compile Include="Modules\ModulePartInfoInPAW.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
@@ -85,11 +89,18 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.8.1\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
+    <PostBuildEvent>echo Updating dll in KSP test install (version 1.8.1, en)
+copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.8.1\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
+echo Updating dll in KSP test install (version 1.9.1, en)
 copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.9.1\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
+echo Updating dll in KSP test install (version 1.10.1, en)
 copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.10.1\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
+echo Updating dll in KSP test install (version 1.11.2, en)
 copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.11.2\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
+echo Updating dll in KSP test install (version 1.12.5, en)
 copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.12.5\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
+echo Updating dll in KSP test install (version 1.12.5, ru)
+copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.12.5 - ru\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

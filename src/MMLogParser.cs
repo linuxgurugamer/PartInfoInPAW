@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -26,6 +27,7 @@ namespace PartInfoInPAW
 		private static string[] LogFileLines;
 
 		private static Dictionary<string, List<MMPatchInfo>> PatchesHistoryDict = new Dictionary<string, List<MMPatchInfo>>();
+		private static Dictionary<string, string[]> PatchesCFGFiles = new Dictionary<string, string[]>();
 
 		public static ParserStatus GetStatus()
 		{
@@ -106,8 +108,8 @@ namespace PartInfoInPAW
 				status = ParserStatus.ParsingLog;
 				Utils.LogDebugMsg($"Parsing MM log file for part {partName}");
 				int lineNum = 0;
-				int totalLinesCount = LogFileLines.Length;
-				if (totalLinesCount > 0)
+				Dictionary<string, int> patchesNums = new Dictionary<string, int>();
+				if (LogFileLines.Length > 0)
 				{
 					string searchStr = "/PART[" + @partName + "]";
 					foreach (string line in LogFileLines)
@@ -117,8 +119,82 @@ namespace PartInfoInPAW
 							Match m = Regex.Match(line.Trim(), RegexPattern(partName));
 							if (m.Success)
 							{
-								patches.Add(new MMPatchInfo(MMPatchInfo.AddExtension(m.Groups[1].ToString()), m.Groups[2].ToString()));
-								Utils.LogDebugMsg($"Found patch for part {partName} in MM log file");
+								Utils.LogDebugMsg($"Found patch for part {partName} in MM log file, parsing patch CFG file");
+								int patchNum = 0;
+								string patchFile = m.Groups[1].ToString();
+								string patchSelector = m.Groups[2].ToString();
+								string key = patchFile + "/" + patchSelector + "/" + partName;
+								if (patchesNums.ContainsKey(key))
+								{
+									patchNum = patchesNums[key] + 1;
+									patchesNums[key] = patchNum;
+								}
+								else
+								{
+									patchesNums.Add(key, 0);
+								}
+								string[] patchCFGFileLines = new string[] { };
+								string cfgFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GameData", MMPatchInfo.AddExtension(patchFile));
+								if (PatchesCFGFiles.ContainsKey(patchFile))
+								{
+									Utils.LogDebugMsg($"CFG file {cfgFilePath.Replace('\\', '/')} found in cache");
+									patchCFGFileLines = PatchesCFGFiles[patchFile];
+								}
+								else
+								{
+									try
+									{
+										patchCFGFileLines = File.ReadAllLines(cfgFilePath, Encoding.UTF8);
+										Utils.LogDebugMsg($"Loaded CFG file {cfgFilePath.Replace('\\', '/')}");
+									}
+									catch (Exception e)
+									{
+										Utils.LogError($"Could not CFG file {cfgFilePath.Replace('\\', '/')} : " + e.Message);
+									}
+								}
+								string fullPatch = null;
+								int occurence = 0;
+								int level = -1;
+								bool found = false;
+								foreach (string cfgLine in patchCFGFileLines)
+								{
+									string[] code = cfgLine.Split(new string[] { "//" }, 2, StringSplitOptions.None);
+									if (code[0].IndexOf(patchSelector) != -1)
+									{
+										if (patchNum == occurence)
+										{
+											found = true;
+											code[0] = code[0].Substring(code[0].IndexOf(patchSelector) + patchSelector.Length);
+										}
+										else
+										{
+											occurence++;
+											continue;
+										}
+									}
+									if (found)
+									{
+										if (!String.IsNullOrWhiteSpace(code[0]))
+										{
+											fullPatch += code[0] + ((code.Length > 1) ? "//" + code[1] : "") + Environment.NewLine;
+											int openingBrCount = code[0].Count(c => c == '{');
+											int closingBrCount = code[0].Count(c => c == '}');
+											if (openingBrCount > 0 || closingBrCount > 0)
+											{
+												level += openingBrCount - closingBrCount;
+												if (level <= -1)
+												{
+													break;
+												}
+											}
+										}
+									}
+								}
+								if (String.IsNullOrWhiteSpace(fullPatch))
+								{
+									fullPatch = null;
+								}
+								patches.Add(new MMPatchInfo(MMPatchInfo.AddExtension(patchFile), patchSelector, fullPatch));
 							}
 						}
 						lineNum++;
@@ -136,7 +212,7 @@ namespace PartInfoInPAW
 			if (PatchesHistoryDict.ContainsKey(partName))
 			{
 				List<MMPatchInfo> patches = PatchesHistoryDict[partName];
-				string result = $"Patches for part {partName}: {patches.Count}" + Environment.NewLine + Environment.NewLine;
+				string result = $"// Patches for part {partName}: {patches.Count}" + Environment.NewLine + Environment.NewLine;
 				foreach (MMPatchInfo m in patches)
 				{
 					result += m;
@@ -145,7 +221,7 @@ namespace PartInfoInPAW
 			}
 			else
 			{
-				return $"Patches count for part {partName}: 0" + Environment.NewLine;
+				return $"// Patches count for part {partName}: 0" + Environment.NewLine;
 			}
 		}
 
@@ -159,11 +235,15 @@ namespace PartInfoInPAW
 	{
 		public string PatchFilePath { get; protected set; }
 		public string Patch { get; protected set; }
+		public string PatchBody { get; protected set; }
+		public bool PatchFullCollapsed { get; protected set; }
 
-		public MMPatchInfo(string patchFilePath, string patch)
+		public MMPatchInfo(string patchFilePath, string patch, string patchBody)
 		{
 			PatchFilePath = patchFilePath;
 			Patch = patch;
+			PatchBody = patchBody;
+			PatchFullCollapsed = true;
 		}
 
 		public static string AddExtension(string patch)
@@ -177,9 +257,59 @@ namespace PartInfoInPAW
 			return result;
 		}
 
+		public void ToggleCollapsed()
+		{
+			PatchFullCollapsed = !PatchFullCollapsed;
+		}
+
+		public void Collapse()
+		{
+			PatchFullCollapsed = true;
+		}
+
+		public void Expand()
+		{
+			PatchFullCollapsed = false;
+		}
+
+		public bool IsCollapsed()
+		{
+			return PatchFullCollapsed;
+		}
+
+		public string GetPatchStr()
+		{
+			if (PatchBody == null)
+			{
+				return "// " + PatchFilePath + Environment.NewLine +
+					Patch + Environment.NewLine +
+					"{} // Could not parse patch CFG from " + PatchFilePath + Environment.NewLine + Environment.NewLine;
+			}
+			return "// " + PatchFilePath + Environment.NewLine +
+				Patch + Environment.NewLine +
+				PatchBody + Environment.NewLine + Environment.NewLine;
+		}
+
 		public override string ToString()
 		{
-			return PatchFilePath + Environment.NewLine + "\t" + Patch + Environment.NewLine;
+			if (PatchFullCollapsed)
+			{
+				return Localizer.Format("#LOC_PartInfoInPAW_PartMMPatchesHistory_PatchFileName", PatchFilePath);
+			}
+			else
+			{
+				if (PatchBody == null)
+				{
+					return Localizer.Format("#LOC_PartInfoInPAW_PartMMPatchesHistory_PatchFileName", PatchFilePath) +
+						Environment.NewLine + Environment.NewLine +
+						Patch + Environment.NewLine +
+						Localizer.Format("#LOC_PartInfoInPAW_CantParsePatchCFG_ErrorMsg");
+				}
+				return Localizer.Format("#LOC_PartInfoInPAW_PartMMPatchesHistory_PatchFileName", PatchFilePath) +
+					Environment.NewLine + Environment.NewLine +
+					Patch + Environment.NewLine +
+					PatchBody;
+			}
 		}
 	}
 }
