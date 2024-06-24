@@ -2,7 +2,7 @@
 
 namespace PartInfoInPAW
 {
-	public class MMPatchesCollapseExpandGUIButton: DialogGUIButton
+	internal class MMPatchesCollapseExpandGUIButton: DialogGUIButton
 	{
 		private const string expandText = "+";
 		private const string collapseText = "-";
@@ -29,9 +29,7 @@ namespace PartInfoInPAW
 
 		private static string GetBtnText(List<MMPatchInfo> patchesList, int index)
 		{
-			if (patchesList[index].IsCollapsed())
-				return expandText;
-			return collapseText;
+			return patchesList[index].IsCollapsed() ? expandText : collapseText;
 		}
 
 		private static void Toggle(List<MMPatchInfo> patchesList, int index)

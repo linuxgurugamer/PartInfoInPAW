@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace PartInfoInPAW
 {
-	public delegate void PartPatchesHistoryCallback(List<MMPatchInfo> patchesList);
+	internal delegate void PartPatchesHistoryCallback(List<MMPatchInfo> patchesList);
 
-	public static class MMLogParser
+	internal static class MMLogParser
 	{
 		public enum ParserStatus
 		{
@@ -112,8 +112,10 @@ namespace PartInfoInPAW
 				if (LogFileLines.Length > 0)
 				{
 					string searchStr = "/PART[" + @partName + "]";
-					foreach (string line in LogFileLines)
+					int linesCount = LogFileLines.Length;
+					for (int i = 0; i < linesCount; i++)
 					{
+						string line = LogFileLines[i];
 						if (line.IndexOf(searchStr) != -1)
 						{
 							Match m = Regex.Match(line.Trim(), RegexPattern(partName));
@@ -156,9 +158,11 @@ namespace PartInfoInPAW
 								int occurence = 0;
 								int level = -1;
 								bool found = false;
-								foreach (string cfgLine in patchCFGFileLines)
+								int cfgLinesCount = patchCFGFileLines.Length;
+								string[] commentStart = { "//" };
+								for (int j = 0; j < cfgLinesCount; j++)
 								{
-									string[] code = cfgLine.Split(new string[] { "//" }, 2, StringSplitOptions.None);
+									string[] code = patchCFGFileLines[j].Split(commentStart, 2, StringSplitOptions.None);
 									if (code[0].IndexOf(patchSelector) != -1)
 									{
 										if (patchNum == occurence)
@@ -207,109 +211,9 @@ namespace PartInfoInPAW
 			return patches;
 		}
 
-		public static string GetPatchesHistoryAsStr(string partName)
-		{
-			if (PatchesHistoryDict.ContainsKey(partName))
-			{
-				List<MMPatchInfo> patches = PatchesHistoryDict[partName];
-				string result = $"// Patches for part {partName}: {patches.Count}" + Environment.NewLine + Environment.NewLine;
-				foreach (MMPatchInfo m in patches)
-				{
-					result += m;
-				}
-				return result;
-			}
-			else
-			{
-				return $"// Patches count for part {partName}: 0" + Environment.NewLine;
-			}
-		}
-
 		private static string RegexPattern(string partName)
 		{
-			return @"^\[LOG \d{2}:\d{2}:\d{2}\.\d{3}\] Applying update (.+)/(@PART\[.+) to .+/PART\[" + Regex.Escape(partName) + @"\]$";
-		}
-	}
-
-	public class MMPatchInfo
-	{
-		public string PatchFilePath { get; protected set; }
-		public string Patch { get; protected set; }
-		public string PatchBody { get; protected set; }
-		public bool PatchFullCollapsed { get; protected set; }
-
-		public MMPatchInfo(string patchFilePath, string patch, string patchBody)
-		{
-			PatchFilePath = patchFilePath;
-			Patch = patch;
-			PatchBody = patchBody;
-			PatchFullCollapsed = true;
-		}
-
-		public static string AddExtension(string patch)
-		{
-			string result = patch;
-			if (result[0] == '/')
-			{
-				result = result.Substring(1);
-			}
-			result += "." + UrlDir.configExtension;
-			return result;
-		}
-
-		public void ToggleCollapsed()
-		{
-			PatchFullCollapsed = !PatchFullCollapsed;
-		}
-
-		public void Collapse()
-		{
-			PatchFullCollapsed = true;
-		}
-
-		public void Expand()
-		{
-			PatchFullCollapsed = false;
-		}
-
-		public bool IsCollapsed()
-		{
-			return PatchFullCollapsed;
-		}
-
-		public string GetPatchStr()
-		{
-			if (PatchBody == null)
-			{
-				return "// " + PatchFilePath + Environment.NewLine +
-					Patch + Environment.NewLine +
-					"{} // Could not parse patch CFG from " + PatchFilePath + Environment.NewLine + Environment.NewLine;
-			}
-			return "// " + PatchFilePath + Environment.NewLine +
-				Patch + Environment.NewLine +
-				PatchBody + Environment.NewLine + Environment.NewLine;
-		}
-
-		public override string ToString()
-		{
-			if (PatchFullCollapsed)
-			{
-				return Localizer.Format("#LOC_PartInfoInPAW_PartMMPatchesHistory_PatchFileName", PatchFilePath);
-			}
-			else
-			{
-				if (PatchBody == null)
-				{
-					return Localizer.Format("#LOC_PartInfoInPAW_PartMMPatchesHistory_PatchFileName", PatchFilePath) +
-						Environment.NewLine + Environment.NewLine +
-						Patch + Environment.NewLine +
-						Localizer.Format("#LOC_PartInfoInPAW_CantParsePatchCFG_ErrorMsg");
-				}
-				return Localizer.Format("#LOC_PartInfoInPAW_PartMMPatchesHistory_PatchFileName", PatchFilePath) +
-					Environment.NewLine + Environment.NewLine +
-					Patch + Environment.NewLine +
-					PatchBody;
-			}
+			return @"^\[LOG \d{2}:\d{2}:\d{2}\.\d{3}\] Applying update (.+)/(@PART.+) to .+/PART\[" + Regex.Escape(partName) + @"\]$";
 		}
 	}
 }

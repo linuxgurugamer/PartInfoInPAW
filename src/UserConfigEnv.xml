@@ -3,6 +3,6 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <KSPManagedDllsPath>d:\KSP Managed</KSPManagedDllsPath>
-    <KSPDevTestInstallsPath>d:\KSP\test</KSPDevTestInstallsPath>
+    <KSPDevTestInstallsPath>d:\KSP test</KSPDevTestInstallsPath>
   </PropertyGroup>
 </Project>

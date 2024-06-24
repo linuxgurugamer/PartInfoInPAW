@@ -39,11 +39,18 @@
     <Compile Include="GameSettings.cs" />
     <Compile Include="GUI\MMPatchesCollapseExpandGUIButton.cs" />
     <Compile Include="GUI\MMPatchesPatchGUILabel.cs" />
-    <Compile Include="MMLogParser.cs" />
+    <Compile Include="MMPatchesParser\MMLogParser.cs" />
+    <Compile Include="MMPatchesParser\MMPatchesUtils.cs" />
+    <Compile Include="MMPatchesParser\MMPatchInfo.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="Utils\ModWithComplexFoldersStruct.cs" />
     <Compile Include="PartInfoInPAW.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="Utils\ModuleEnginesExtensions.cs" />
+    <Compile Include="Utils\Utils.cs" />
+    <Compile Include="Utils\PropellantInfo.cs" />
     <Compile Include="GUI\MMPatchesHistoryDialog.cs" />
-    <Compile Include="Modules\ModulePartInfoInPAW.cs" />
+    <Compile Include="PartModules\ModulePartInfoInPAW.cs" />
+    <Compile Include="Utils\PartExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
@@ -51,38 +58,38 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.8.0\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(KSPManagedDllsPath)\1.12.5\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.8.0\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>$(KSPManagedDllsPath)\1.12.5\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.8.0\UnityEngine.dll</HintPath>
+      <HintPath>$(KSPManagedDllsPath)\1.12.5\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.8.0\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(KSPManagedDllsPath)\1.12.5\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.8.0\UnityEngine.UI.dll</HintPath>
+      <HintPath>$(KSPManagedDllsPath)\1.12.5\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.8.0\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(KSPManagedDllsPath)\1.12.5\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.8.0\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>$(KSPManagedDllsPath)\1.12.5\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

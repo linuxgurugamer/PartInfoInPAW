@@ -2,7 +2,7 @@
 
 namespace PartInfoInPAW
 {
-	public class MMPatchesPatchGUILabel: DialogGUILabel
+	internal class MMPatchesPatchGUILabel: DialogGUILabel
 	{
 		public MMPatchesPatchGUILabel(
 			List<MMPatchInfo> patchesList,

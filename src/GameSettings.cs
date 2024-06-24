@@ -1,6 +1,6 @@
 ﻿namespace PartInfoInPAW
 {
-	public class PartInfoInPAWGameSettings_PartInfo : GameParameters.CustomParameterNode
+	internal class PartInfoInPAWGameSettings_PartInfo : GameParameters.CustomParameterNode
 	{
 		public override string DisplaySection
 		{
@@ -58,7 +58,7 @@
 		public override bool Interactible(System.Reflection.MemberInfo member, GameParameters parameters)
 		{
 			if (member.Name == "showCopyPartNodeBtn" || member.Name == "showOpenPartCFGInEditorBtn" || member.Name == "showPartMMPatchesHistoryBtn")
-				return Utils.ModuleManagerInstalled;
+				return PartInfoInPAW.IsModuleManagerPresent();
 			return true;
 		}
 
@@ -105,7 +105,7 @@
 		public bool showPartMMPatchesHistoryBtn = true;
 	}
 
-	public class PartInfoInPAWGameSettings_EngineInfo : GameParameters.CustomParameterNode
+	internal class PartInfoInPAWGameSettings_EngineInfo : GameParameters.CustomParameterNode
 	{
 		public override string DisplaySection
 		{

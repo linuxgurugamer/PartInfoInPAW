@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -11,6 +10,15 @@ namespace PartInfoInPAW
 {
 	public class ModulePartInfoInPAW : PartModule
 	{
+		private ModuleEngines engine1;
+		private ModuleEngines engine2;
+
+		private bool InfoUpdated = false;
+
+		private int lastCrewHashCode = 0;
+		private static DateTime lastCrewUpdate = DateTime.UtcNow;
+		const double crewUpdateDelay = 200.0; // 5 times per second
+
 		#region GUI: Fields
 
 		[KSPField(isPersistant = false, guiActiveEditor = true, guiActive = false, guiName = "#LOC_PartInfoInPAW_PartName_Title", groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle", groupStartCollapsed = true)]
@@ -27,6 +35,9 @@ namespace PartInfoInPAW
 
 		[KSPField(isPersistant = false, guiActiveEditor = true, guiActive = false, guiName = "#LOC_PartInfoInPAW_PartEntryCost_Title", groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle", groupStartCollapsed = true)]
 		public int partEntryCost = 0;
+
+		[KSPField(isPersistant = false, guiActiveEditor = true, guiActive = false, guiName = "#LOC_PartInfoInPAW_PartCrewInfo_Title", groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle", groupStartCollapsed = true)]
+		public string partCrewInfo = "";
 
 		[KSPField(isPersistant = false, guiActiveEditor = false, guiActive = false, guiName = "#LOC_PartInfoInPAW_EnginePropellants_Title", groupName = "engine1Info", groupDisplayName = "#LOC_PartInfoInPAW_Engine1Info_GroupTitle", groupStartCollapsed = true)]
 		public string engine1Propellants = "";
@@ -88,7 +99,7 @@ namespace PartInfoInPAW
 			string partCFG;
 			try
 			{
-				partCFG = GetConfigNodeText();
+				partCFG = part.GetConfigNodeText(partName);
 			}
 			catch (Exception e)
 			{
@@ -117,7 +128,7 @@ namespace PartInfoInPAW
 			ConfigNode cfg = GameDatabase.Instance.GetConfigNode(part.partInfo.partUrl) ?? part.partInfo.partConfig;
 			try
 			{
-				partCFG = GetConfigNodeText();
+				partCFG = part.GetConfigNodeText(partName);
 			}
 			catch (Exception e)
 			{
@@ -183,64 +194,24 @@ namespace PartInfoInPAW
 
 		#endregion GUI: Buttons
 
-		protected ModuleEngines engine1;
-		protected ModuleEngines engine2;
+		#region Mods with complex folders struct
 
-		protected bool InfoUpdated = false;
-
-		#region ModWithComplexFoldersStruct
-
-		public readonly struct ModWithComplexFoldersStruct
+		private static List<ModWithComplexFoldersStruct> ModsWithComplexFoldersStruct = new List<ModWithComplexFoldersStruct>()
 		{
-			private readonly string ModFolder;
-			private readonly int NestingLevel;
-
-			public ModWithComplexFoldersStruct(string folder, int nestLevel = 2)
-			{
-				ModFolder = folder;
-				NestingLevel = nestLevel;
-			}
-
-			public bool URLMatches(string url)
-			{
-				return (ModFolder == url.Split('/')[0]);
-			}
-
-			public string BuildModName(string url)
-			{
-				int nestLevel = NestingLevel;
-				string[] folders = url.Split('/');
-				string result = "";
-				if (folders.Length < nestLevel)
-				{
-					nestLevel = folders.Length;
-				}
-				for (int i = 0; i < nestLevel; i++)
-				{
-					if (i > 0)
-					{
-						result += "/" + folders[i];
-					}
-					else
-					{
-						result += folders[i];
-					}
-				}
-				return result;
-			}
-		}
-
-		protected static List<ModWithComplexFoldersStruct> ModsWithComplexFoldersStruct = new List<ModWithComplexFoldersStruct>()
-		{
+			new ModWithComplexFoldersStruct("Bluedog_DB", 3),
 			new ModWithComplexFoldersStruct("RealEnginesPack"),
 			new ModWithComplexFoldersStruct("reDIRECT"),
 			new ModWithComplexFoldersStruct("SquadExpansion"),
 			new ModWithComplexFoldersStruct("UmbraSpaceIndustries"),
 			new ModWithComplexFoldersStruct("WildBlueIndustries"),
-			new ModWithComplexFoldersStruct("Bluedog_DB", 3),
 		};
 
-		#endregion ModWithComplexFoldersStruct
+		#endregion Mods with complex folders struct
+
+		public string GetModuleTitle()
+		{
+			return Localizer.Format("#LOC_PartInfoInPAW_PartModuleName");
+		}
 
 		private void Start()
 		{
@@ -255,11 +226,14 @@ namespace PartInfoInPAW
 			Fields["partEntryCost"].guiActiveEditor = settingsPartInfo.showPartInfo;
 
 			Events["CopyPartName"].guiActiveEditor = settingsPartInfo.showCopyPartNameBtn;
-			Events["CopyPartConfigNode"].guiActiveEditor = settingsPartInfo.showCopyPartNodeBtn && Utils.ModuleManagerInstalled;
-			Events["OpenPartCFGInEditor"].guiActiveEditor = settingsPartInfo.showOpenPartCFGInEditorBtn && Utils.ModuleManagerInstalled;
+			Events["CopyPartConfigNode"].guiActiveEditor = settingsPartInfo.showCopyPartNodeBtn && PartInfoInPAW.IsModuleManagerPresent();
+			Events["OpenPartCFGInEditor"].guiActiveEditor = settingsPartInfo.showOpenPartCFGInEditorBtn && PartInfoInPAW.IsModuleManagerPresent();
 			Events["CopyOrigPartConfigNode"].guiActiveEditor = settingsPartInfo.showCopyOrigPartNodeBtn;
 			Events["OpenOrigPartCFGInEditor"].guiActiveEditor = settingsPartInfo.showOpenOrigPartCFGInEditorBtn;
-			Events["ShowMMPatchesHistory"].guiActiveEditor = settingsPartInfo.showPartMMPatchesHistoryBtn && Utils.ModuleManagerInstalled;
+			Events["ShowMMPatchesHistory"].guiActiveEditor = settingsPartInfo.showPartMMPatchesHistoryBtn && PartInfoInPAW.IsModuleManagerPresent();
+
+			partName = part.GetPartName();
+			partModName = GetPartModName();
 		}
 
 		private void OnDestroy()
@@ -293,28 +267,38 @@ namespace PartInfoInPAW
 			if (!InfoUpdated)
 			{
 				UpdateInfo();
+				return;
+			}
+			if (needToUpdateCrewMassAndCost())
+			{
+				UpdateCrewMassAndCost();
 			}
 		}
 
-		private void UpdateInfo()
+		private bool needToUpdateCrewMassAndCost()
 		{
-			if (partName == "")
-			{
-				partName = part.GetPartName();
+			if (part.CrewCapacity <= 0) {
+				return false;
 			}
-			if (partModName == "")
+			if ((DateTime.UtcNow - lastCrewUpdate).TotalMilliseconds >= crewUpdateDelay)
 			{
-				partModName = GetPartModName();
+				int crewHashCode = part.GetCrewHashCode();
+				if (crewHashCode != lastCrewHashCode)
+				{
+					lastCrewHashCode = crewHashCode;
+					lastCrewUpdate = DateTime.UtcNow;
+					return true;
+				}
 			}
+			return false;
+		}
 
-			ModuleEngines[] engines;
-			MultiModeEngine[] multiModeEngines;
-
+		private void UpdateCrewMassAndCost()
+		{
 			float prefabMass = part.partInfo.partPrefab.mass;
 			float dryMass = prefabMass + part.GetModuleMass(prefabMass);
-			float resMass = part.GetResourceMass();
-			float wetMass = dryMass + resMass;
-			if (Math.Abs(resMass) <= float.Epsilon)
+			float wetMass = dryMass + part.GetResourceMass() + part.GetCrewAndInventoryMass();
+			if (Math.Abs(wetMass - dryMass) <= float.Epsilon)
 			{
 				// Dry mass only
 				Fields["partMass"].guiName = Localizer.Format("#LOC_PartInfoInPAW_PartDryMass_Title");
@@ -326,26 +310,48 @@ namespace PartInfoInPAW
 				Fields["partMass"].guiName = Localizer.Format("#LOC_PartInfoInPAW_PartDryWetMass_Title");
 				partMass = Utils.FormatMass(dryMass) + " / " + Utils.FormatMass(wetMass);
 			}
-			float partFullCost = part.partInfo.cost + part.GetModuleCosts(part.partInfo.cost);
-			float fullCost = partFullCost + part.GetResourceCostOffset();
-			float emptyCost = partFullCost - part.GetResourceCostMax();
+			float fullCost = part.partInfo.cost + part.GetModuleCosts(part.partInfo.cost) + part.GetResourceCostOffset() + part.GetCrewInventoryCost();
+			float emptyCost = part.partInfo.cost + part.GetModuleCosts(part.partInfo.cost) - part.GetResourceCostMax();
 			if (Math.Abs(fullCost - emptyCost) < float.Epsilon)
 			{
-				// Cost without resources
+				// Cost without resources and inventory
 				Fields["partCost"].guiName = Localizer.Format("#LOC_PartInfoInPAW_PartCost_Title");
 				partCost = fullCost.ToString("F0");
 			}
 			else
 			{
-				// Full cost (with resources) and cost without resources
+				// Full cost (with resources and inventory) and cost without resources
 				Fields["partCost"].guiName = Localizer.Format("#LOC_PartInfoInPAW_PartEmptyCostFullCost_Title");
 				partCost = emptyCost.ToString("F0") + " / " + fullCost.ToString("F0");
 			}
 
-			partEntryCost = part.partInfo.entryCost;
+			// Crew info
+			if (part.CrewCapacity > 0)
+			{
+				Fields["partCrewInfo"].guiActiveEditor = true;
+				partCrewInfo = part.GetCrewCount().ToString() + " / " + part.CrewCapacity.ToString();
+			}
+			else
+			{
+				Fields["partCrewInfo"].guiActiveEditor = false;
+			}
+		}
+
+		private void UpdateInfo()
+		{
+			ModuleEngines[] engines;
+			MultiModeEngine[] multiModeEngines;
+
+			PartInfoInPAWGameSettings_PartInfo settingsPartInfo = HighLogic.CurrentGame.Parameters.CustomParams<PartInfoInPAWGameSettings_PartInfo>();
+			PartInfoInPAWGameSettings_EngineInfo settingsEngineInfo = HighLogic.CurrentGame.Parameters.CustomParams<PartInfoInPAWGameSettings_EngineInfo>();
+
+			if (settingsPartInfo.showPartInfo)
+			{
+				UpdateCrewMassAndCost();
+				partEntryCost = part.partInfo.entryCost;
+			}
 
 			engines = part.GetComponents<ModuleEngines>();
-			PartInfoInPAWGameSettings_EngineInfo settingsEngineInfo = HighLogic.CurrentGame.Parameters.CustomParams<PartInfoInPAWGameSettings_EngineInfo>();
 			if (engines.Length == 0 || !settingsEngineInfo.showEngineInfo)
 			{
 				Fields["engine1Propellants"].guiActiveEditor = false;
@@ -497,41 +503,15 @@ namespace PartInfoInPAW
 		private string GetPartModName()
 		{
 			string url = part.partInfo.partUrl;
-			foreach (var mod in ModsWithComplexFoldersStruct)
+			int modsCount = ModsWithComplexFoldersStruct.Count;
+			for (int i = 0; i < modsCount; i++)
 			{
-				if (mod.URLMatches(url))
+				if (ModsWithComplexFoldersStruct[i].URLMatches(url))
 				{
-					return "\n" + mod.BuildModName(url);
+					return "\n" + ModsWithComplexFoldersStruct[i].BuildModName(url);
 				}
 			}
 			return url.Split('/')[0];
-		}
-
-		private string GetConfigNodeText()
-		{
-			ConfigNode cfg;
-			try
-			{
-				cfg = GameDatabase.Instance.GetConfigNode(part.partInfo.partUrl) ?? part.partInfo.partConfig;
-			}
-			catch (Exception e)
-			{
-				throw new Exception($"Couldn't get config node for part {part.partInfo.name}: " + e.Message);
-			}
-			string nodeText;
-			if (cfg != null)
-			{
-				nodeText = cfg.ToString();
-				if (cfg != null && !cfg.HasValue("name") && (partName != ""))
-				{
-					nodeText = Utils.ReplaceFirstOccurrence(nodeText, "{", "{" + $"{Environment.NewLine}\tname = {partName}");
-				}
-			}
-			else
-			{
-				throw new Exception($"Couldn't get config node for part {part.partInfo.name}: CFG node is null for some reason");
-			}
-			return nodeText;
 		}
 
 		public override string GetInfo()
@@ -548,5 +528,14 @@ namespace PartInfoInPAW
 			string partURL = String.Join("<color=#a0a0a0>/</color><br>", urlSegments) + "." + UrlDir.configExtension;
 			return Localizer.Format("#LOC_PartInfoInPAW_PartModuleInfo", partName, partURL);
 		}
+
+		#region RealFuels events
+
+		public virtual void OnEngineConfigurationChanged()
+		{
+			InfoUpdated = false;
+		}
+
+		#endregion RealFuels events
 	}
 }

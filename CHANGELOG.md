@@ -1,3 +1,15 @@
+0.3.0
+-----
+- Added buttons "Open CFG node in editor" and "Open orig. CFG in editor" to PAW menu. Both buttons open corresponding file in system default editor for .cfg files.
+- Added crew / maximum crew information to PAW menu.
+- For KSP 1.11+ displayed wet part mass and cost takes into account kerbonauts mass and their inventories mass/cost.
+- Engine information in PAW menu was completely overhauled. Now it also contains gimbal information, as well as other useful parameters, depending on engine type. Near/Far Future, KSPIE, RealFuels/RO are supported.
+- New button "MM patches history" opens window with tree-like structure of all module manager patches, applied to part, in order of appliance. Information about patches is parsed from module manager cache.
+- Mod menu options and buttons are now fully configurable in game difficulty settings ("Part Info in PAW" section).
+- PartInfoInPAW adds itself to each and every part during game load. MM patch, adding partmodule to all parts, is no longer needed and is deprecated.
+- Mod now only works in VAB/Hangar and is no more available in flight scene.
+- Perfomance improvements and code cleanup.
+
 0.2.3
 -----
 - Fixed "Copy Part CFG to Clipboard" not working for parts, having spaces in their cfg-file path (for example, Coatl Aerospace mod).

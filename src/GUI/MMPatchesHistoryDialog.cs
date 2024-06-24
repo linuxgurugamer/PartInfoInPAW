@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace PartInfoInPAW
 {
-	public static class MMPatchesHistoryDialog
+	internal static class MMPatchesHistoryDialog
 	{
 		private static PopupDialog dialog;
 		private static List<MMPatchInfo> patchesList;
@@ -121,7 +121,7 @@ namespace PartInfoInPAW
 							new DialogGUIButton(
 								Localizer.Format("#LOC_PartInfoInPAW_PartMMPatchesHistory_CopyPatchesHistoryFileBtn"),
 								() => {
-									string patchesHistory = Utils.GetPartMMPatchesHistory(part, patchesList, IncludePartCFGInPatchesCode);
+									string patchesHistory = MMPatchesUtils.GetPartMMPatchesHistory(part, patchesList, IncludePartCFGInPatchesCode);
 									if (!String.IsNullOrEmpty(patchesHistory))
 									{
 										try
@@ -143,7 +143,7 @@ namespace PartInfoInPAW
 							new DialogGUIButton(
 								Localizer.Format("#LOC_PartInfoInPAW_PartMMPatchesHistory_OpenPatchesHistoryBtn"),
 								() => {
-									string patchesHistory = Utils.GetPartMMPatchesHistory(part, patchesList, IncludePartCFGInPatchesCode);
+									string patchesHistory = MMPatchesUtils.GetPartMMPatchesHistory(part, patchesList, IncludePartCFGInPatchesCode);
 									if (!String.IsNullOrEmpty(patchesHistory))
 									{
 										string fileName = partName;
@@ -200,7 +200,8 @@ namespace PartInfoInPAW
 					)
 				),
 				false,
-				HighLogic.UISkin
+				HighLogic.UISkin,
+				false
 			);
 		}
 	}
