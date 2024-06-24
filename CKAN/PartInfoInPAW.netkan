@@ -1,7 +1,7 @@
 {
     "spec_version"   : "v1.4",
     "name": "Part info in PAW",
-    "abstract" : "Copy part ID or full part CFG to clipboard with one click, get useful information about part from PAW menu",
+    "abstract" : "Copy to clipboard or open in editor full/original part CFG with one click, get useful information about part from PAW menu, including full MM patches history",
     "identifier"     : "PartInfoInPAW",
     "$kref"          : "#/ckan/spacedock/3148",
     "$vref"          : "#/ckan/ksp-avc",
@@ -19,9 +19,7 @@
     },
     "ksp_version_min": "1.8.0",
     "ksp_version_max": "1.12.99",
-    "depends" : [
-        { "name" : "ModuleManager", "min_version" : "3.1.3" }
-    ],
+    "depends" : [],
     "install" : [
         { "find" : "PartInfoInPAW", "install_to" : "GameData" }
     ]
