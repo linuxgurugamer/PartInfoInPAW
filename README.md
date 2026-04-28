@@ -9,7 +9,7 @@ Get useful information about part from PAW menu (including full module manager p
 ![PartInfoInPAW GetInfo](https://i.imgur.com/x889rHz.png)
 This feature is more or less identical to [PartInfo mod by linuxgurugamer](https://forum.kerbalspaceprogram.com/index.php?/topic/182040-*).
 
-2. PartInfoInPAW also adds some information to PAW menu (right-click menu) for alls parts (works only in VAB/SPH).
+2. PartInfoInPAW also adds some information to PAW menu (right-click menu) for alls parts (works in VAB/SPH and in flight).
     This information include:
     * part name (basically, part ID);
     * part mod (GameData folder name);
@@ -25,8 +25,12 @@ This feature is more or less identical to [PartInfo mod by linuxgurugamer](https
 
 3. Mod adds several buttons to PAW menu:
     * **Copy part name** - copy part name (ID) to clipboard;
-    * **Copy orig. CFG file** / **Open orig. CFG in editor** - copy original part CFG file to clipboard / opens it in system default editor for .cfg files;
-    * **Copy part CFG node** / **Open CFG node in editor** - copy part CFG to clipboard / save it to temporary file and open in system default editor for .cfg files. **Important**: "part CFG" here means actual in-game part representation, not text from original part CFG-file. That means, whole PART{} node with all MM-patches already applied to it;
+    * **Copy orig. CFG file** - copy original part CFG file to clipboard 
+    * **Open orig. CFG in editor** - opens it in system default editor for .cfg files;
+    * **Open orig. CFG in window** - opens it in a window in-game;
+    * **Copy part CFG node** - copy part CFG to clipboard 
+    * **Open CFG node in editor** - save it to temporary file and open in system default editor for .cfg files. **Important**: "part CFG" here means actual in-game part representation, not text from original part CFG-file. That means, whole PART{} node with all MM-patches already applied to it, also all comments are stripped;
+    * **Open CFG node in window** - save it to temporary file and open in a window in-game
     * **MM patches history** - opens window with history all module manager patches. See screenshot:
     ![MM patches history](https://i.imgur.com/o9CXClM.png)
 
@@ -36,7 +40,6 @@ This feature is more or less identical to [PartInfo mod by linuxgurugamer](https
 ## No dependencies
 
 As of version 0.3.0, PartInfoInPAW no longer relies on module manager patch for adding itself to every part. Instead, mod do so automatically during KSP startup.
-Downside is, mod only works in editor scene now (VAB/Hangar).
 
 ## Supported KSP versions
 

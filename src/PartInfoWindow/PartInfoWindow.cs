@@ -263,8 +263,9 @@ namespace PartInfoInPAW.PartInfoWindow
 
 		void Start()
 		{
-			//if (!HighLogic.LoadedSceneIsEditor && !HighLogic.CurrentGame.Parameters.CustomParams<PartInfoSettings>().availableInFlight)
-			//	Destroy(this);
+			if (!HighLogic.LoadedSceneIsEditor && ! HighLogic.CurrentGame.Parameters.CustomParams<PartInfoInPAWGameSettings_PartInfoInFlight>().showPartInfoInFlight)
+				Destroy(this);
+
 			//if (Log == null)
 			//    Log = new Log("PartInfo", Log.LEVEL.INFO);
 			//Log.Info("Start, ModulePartInfo.currentPart.persistentId: " + ModulePartInfo.currentPart.persistentId);

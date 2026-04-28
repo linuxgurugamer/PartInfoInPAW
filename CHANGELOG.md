@@ -2,12 +2,13 @@ Changelog
 
 0.4.0
 	Adoption by Linuxgurugamer
-	Added code to make available in flight
+	Added code to make available in flight.  If not set to be available in flight, will not affect performance (destorys itself)
 	Added options to settings to enable/disable individual items in flight, exactly as done in the editor
 	Fixed errors when trying to add mode to parts beginning with KerbalEVA or a flag
 	Added ability to show files in window in-game in addition to or instead of an external editor
 	In-game window also shows the FloatCurve graphs (not available in external editor)
 	Added ClickThroughBlocker as a dependency
+	Added Bulkhead Profiles to PAW
 	Updated russian config for new lines
 
 0.3.0

@@ -40,6 +40,9 @@ namespace PartInfoInPAW
 		[KSPField(isPersistant = false, guiActiveEditor = true, guiActive = false, guiName = "#LOC_PartInfoInPAW_PartCrewInfo_Title", groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle", groupStartCollapsed = true)]
 		public string partCrewInfo = "";
 
+		[KSPField(isPersistant = false, guiActiveEditor = true, guiActive = false, guiName = "#LOC_PartInfoInPAW_BulkheadProfiles", groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle", groupStartCollapsed = true)]
+		public string bulkheadProfiles = "";
+
 		[KSPField(isPersistant = false, guiActiveEditor = false, guiActive = false, guiName = "#LOC_PartInfoInPAW_EnginePropellants_Title", groupName = "engine1Info", groupDisplayName = "#LOC_PartInfoInPAW_Engine1Info_GroupTitle", groupStartCollapsed = true)]
 		public string engine1Propellants = "";
 
@@ -374,11 +377,24 @@ namespace PartInfoInPAW
 			if (part.CrewCapacity > 0)
 			{
 				Fields["partCrewInfo"].guiActiveEditor = true;
+				Fields["partCrewInfo"].guiActive = true;
 				partCrewInfo = part.GetCrewCount().ToString() + " / " + part.CrewCapacity.ToString();
 			}
 			else
 			{
 				Fields["partCrewInfo"].guiActiveEditor = false;
+				Fields["partCrewInfo"].guiActive = false;
+			}
+			if (part.partInfo.bulkheadProfiles != null && part.partInfo.bulkheadProfiles != "")
+			{
+				Fields["bulkheadProfiles"].guiActiveEditor = true;
+				Fields["bulkheadProfiles"].guiActive = true;
+				bulkheadProfiles = part.partInfo.bulkheadProfiles;
+			}
+			else
+			{
+				Fields["bulkheadProfiles"].guiActiveEditor = false;
+				Fields["bulkheadProfiles"].guiActive = false;
 			}
 		}
 
