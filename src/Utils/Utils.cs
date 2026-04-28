@@ -45,23 +45,28 @@ namespace PartInfoInPAW
 			return result;
 		}
 		
-		public static void ShellOpenFile(string filePath)
+		public static void ShellOpenFile(Part part, string filePath)
 		{
-			ProcessStartInfo procInfo = new ProcessStartInfo
+			PartInfoInPAWGameSettings_PartInfo settingsPartInfo = HighLogic.CurrentGame.Parameters.CustomParams<PartInfoInPAWGameSettings_PartInfo>();
+
+			if (settingsPartInfo.useExternalEditor)
 			{
-				FileName = @filePath,
-				UseShellExecute = true
-			};
-			try
-			{
-				Process.Start(procInfo);
-				Log($"Opening file {filePath.Replace('\\', '/')} in default editor");
-			}
-			catch (Exception e)
-			{
-				LogError($"Could not open default editor for file {filePath}: " + e.Message);
-				OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_CantOpenFile_FailureMsg", filePath));
-				return;
+				ProcessStartInfo procInfo = new ProcessStartInfo
+				{
+					FileName = @filePath,
+					UseShellExecute = true
+				};
+				try
+				{
+					Process.Start(procInfo);
+					Log($"Opening file {filePath.Replace('\\', '/')} in default editor");
+				}
+				catch (Exception e)
+				{
+					LogError($"Could not open default editor for file {filePath}: " + e.Message);
+					OnScreenMsg(Localizer.Format("#LOC_PartInfoInPAW_CantOpenFile_FailureMsg", filePath));
+					return;
+				}
 			}
 		}
 

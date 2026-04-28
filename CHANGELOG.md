@@ -1,5 +1,16 @@
+Changelog
+
+0.4.0
+	Adoption by Linuxgurugamer
+	Added code to make available in flight
+	Added options to settings to enable/disable individual items in flight, exactly as done in the editor
+	Fixed errors when trying to add mode to parts beginning with KerbalEVA or a flag
+	Added ability to show files in window in-game in addition to or instead of an external editor
+	In-game window also shows the FloatCurve graphs (not available in external editor)
+	Added ClickThroughBlocker as a dependency
+	Updated russian config for new lines
+
 0.3.0
------
 - Added buttons "Open CFG node in editor" and "Open orig. CFG in editor" to PAW menu. Both buttons open corresponding file in system default editor for .cfg files.
 - Added crew / maximum crew information to PAW menu.
 - For KSP 1.11+ displayed wet part mass and cost takes into account kerbonauts mass and their inventories mass/cost.

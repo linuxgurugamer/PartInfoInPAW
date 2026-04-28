@@ -36,12 +36,21 @@
   </PropertyGroup>
   <Import Project="UserConfigEnv.xml" />
   <ItemGroup>
+    <Compile Include="AssemblyVersion.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AssemblyVersion.tt</DependentUpon>
+    </Compile>
     <Compile Include="GameSettings.cs" />
     <Compile Include="GUI\MMPatchesCollapseExpandGUIButton.cs" />
     <Compile Include="GUI\MMPatchesPatchGUILabel.cs" />
+    <Compile Include="InstallChecker.cs" />
     <Compile Include="MMPatchesParser\MMLogParser.cs" />
     <Compile Include="MMPatchesParser\MMPatchesUtils.cs" />
     <Compile Include="MMPatchesParser\MMPatchInfo.cs" />
+    <Compile Include="PartInfoWindow\FloatCurveGraph.cs" />
+    <Compile Include="PartInfoWindow\KspPartStanzaReader.cs" />
+    <Compile Include="PartInfoWindow\PartInfoWindow.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Utils\ModWithComplexFoldersStruct.cs" />
     <Compile Include="PartInfoInPAW.cs" />
@@ -56,59 +65,52 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.12.5\Assembly-CSharp.dll</HintPath>
+    <Reference Include="$(KSPDIR)\KSP_x64_Data\Managed\Assembly*.dll">
       <Private>False</Private>
     </Reference>
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.12.5\Assembly-CSharp-firstpass.dll</HintPath>
+    <Reference Include="$(KSPDIR)\KSP_x64_Data\Managed\UnityEngine*.dll">
       <Private>False</Private>
+    </Reference>
+    <Reference Include="ClickThroughBlocker">
+      <HintPath>R:\KSP\KSP_1.12.5-dev\GameData\000_ClickThroughBlocker\Plugins\ClickThroughBlocker.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.12.5\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.12.5\UnityEngine.CoreModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.12.5\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.12.5\UnityEngine.IMGUIModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSPManagedDllsPath)\1.12.5\UnityEngine.TextRenderingModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="AssemblyVersion.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>AssemblyVersion.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>echo Updating dll in KSP test install (version 1.8.1, en)
-copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.8.1\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
-echo Updating dll in KSP test install (version 1.9.1, en)
-copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.9.1\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
-echo Updating dll in KSP test install (version 1.10.1, en)
-copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.10.1\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
-echo Updating dll in KSP test install (version 1.11.2, en)
-copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.11.2\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
-echo Updating dll in KSP test install (version 1.12.5, en)
-copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.12.5\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
-echo Updating dll in KSP test install (version 1.12.5, ru)
-copy /Y "$(TargetDir)$(ProjectName).dll" "$(KSPDevTestInstallsPath)\1.12.5 - ru\GameData\PartInfoInPAW\Plugins\PartInfoInPAW.dll"
-</PostBuildEvent>
+    <PostBuildEvent>set KSPDIR=$(KSPDIR)
+
+IF "%25KSPDIR%25"=="" (
+
+	ECHO Configuration error - KSPDIR not specified in project.
+
+	ECHO Either set KSPDIR environment variable or edit BetterLoadSaveGame.Common.props
+
+	PAUSE
+
+	GOTO DONE
+
+)
+
+start /D $(SolutionDir) /WAIT deploy.bat  $(TargetDir) $(TargetFileName) $(TargetName)
+
+if $(ConfigurationName) == Release (	
+
+	start /D $(SolutionDir) /WAIT buildRelease.bat $(TargetDir) $(TargetFileName) $(TargetName)
+
+)</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>"$(DevEnvDir)\texttransform.exe" "$(ProjectDir)AssemblyVersion.tt"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

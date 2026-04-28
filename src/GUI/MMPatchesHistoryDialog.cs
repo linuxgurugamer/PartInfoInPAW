@@ -170,7 +170,7 @@ namespace PartInfoInPAW
 												return;
 											}
 										}
-										Utils.ShellOpenFile(filePath);
+										Utils.ShellOpenFile(part, filePath);
 									}
 								},
 								() => patchesList.Count >= 0 || IncludePartCFGInPatchesCode,

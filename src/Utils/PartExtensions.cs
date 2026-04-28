@@ -1,8 +1,8 @@
 ﻿using KSP.Localization;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using static FinePrint.ContractDefs;
 
 namespace PartInfoInPAW
 {
@@ -38,16 +38,26 @@ namespace PartInfoInPAW
 		public static ProtoCrewMember[] GetCrew(this Part part)
 		{
 			// taken from Kerbalism code
-			long partID = 4294967296L + part.GetInstanceID();
-			var manifest = KSP.UI.CrewAssignmentDialog.Instance.GetManifest();
-			var partManifest = manifest.GetCrewableParts().Find(k => k.PartID == partID);
-			if (partManifest != null)
+			if (HighLogic.LoadedSceneIsFlight)
 			{
-				return Array.FindAll(partManifest.GetPartCrew(), c => c != null);
+				var crew = part.protoModuleCrew.ToArray();
+				return crew;
 			}
-			return new ProtoCrewMember[0];
+			else
+			{
+				long partID = 4294967296L + part.GetInstanceID();
+				var manifest = KSP.UI.CrewAssignmentDialog.Instance.GetManifest();
+				var partManifest = manifest.GetCrewableParts().Find(k => k.PartID == partID);
+				if (partManifest != null)
+				{
+					return Array.FindAll(partManifest.GetPartCrew(), c => c != null);
+				}
+				return new ProtoCrewMember[0];
+			}
+
 		}
 
+#if false
 		public static int GetCrewHashCode(this Part part)
 		{
 			int CombineHashCodes(int h1, int h2)
@@ -65,6 +75,44 @@ namespace PartInfoInPAW
 			}
 			return 0;
 		}
+#else
+		static int CombineHashCodes(int h1, int h2)
+		{
+			return (((h1 << 5) + h1) ^ h2);
+		}
+		public static int GetCrewHashCode(this Part part)
+		{
+			if (part == null)
+				return 0;
+
+			IEnumerable<ProtoCrewMember> crew = null;
+
+			if (HighLogic.LoadedSceneIsEditor &&
+				 KSP.UI.CrewAssignmentDialog.Instance != null)
+			{
+				long partID = 4294967296L + part.GetInstanceID();
+
+				var manifest = KSP.UI.CrewAssignmentDialog.Instance.GetManifest();
+				var partManifest = manifest.GetCrewableParts()
+					 .Find(k => k.PartID == partID);
+
+				if (partManifest != null)
+					crew = partManifest.GetPartCrew();
+			}
+			else if (HighLogic.LoadedSceneIsFlight)
+			{
+				crew = part.protoModuleCrew;
+			}
+
+			if (crew == null)
+				return 0;
+
+			return crew
+				 .Where(c => c != null)
+				 .Aggregate(0, (hash, c) =>
+					  CombineHashCodes(hash, c.name.GetHashCode()));
+		}
+#endif
 
 		public static int GetCrewCount(this Part part)
 		{

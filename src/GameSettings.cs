@@ -2,53 +2,18 @@
 {
 	internal class PartInfoInPAWGameSettings_PartInfo : GameParameters.CustomParameterNode
 	{
-		public override string DisplaySection
-		{
-			get
-			{
-				return Section;
-			}
-		}
+		public override string DisplaySection { get { return Section; } }
 
-		public override string Section
-		{
-			get
-			{
-				return "#LOC_PartInfoInPAW_Settings_Title";
-			}
-		}
+		public override string Section { get { return "#LOC_PartInfoInPAW_Settings_Title"; } }
 
-		public override string Title
-		{
-			get
-			{
-				return "#LOC_PartInfoInPAW_Settings_PartInfo_Title";
-			}
-		}
+		public override string Title { get { return "#LOC_PartInfoInPAW_Settings_PartInfo_Title"; } }
 
-		public override int SectionOrder
-		{
-			get
-			{
-				return 1;
-			}
-		}
+		public override int SectionOrder { get { return 1; } }
 
-		public override GameParameters.GameMode GameMode
-		{
-			get
-			{
-				return GameParameters.GameMode.ANY;
-			}
-		}
+		public override GameParameters.GameMode GameMode { get { return GameParameters.GameMode.ANY; } }
 
-		public override bool HasPresets
-		{
-			get
-			{
-				return false;
-			}
-		}
+		public override bool HasPresets { get { return false; } }
+
 
 		public override bool Enabled(System.Reflection.MemberInfo member, GameParameters parameters)
 		{
@@ -67,12 +32,12 @@
 			autoPersistance = true)]
 		public bool showPartInfo = true;
 
-		[GameParameters.CustomStringParameterUI("showButtonsTitle",
-			title = "#LOC_PartInfoInPAW_Settings_ShowButtonsTitle",
-			toolTip = "#LOC_PartInfoInPAW_Settings_ShowButtonsTitle_Tooltip",
-			lines = 2,
-			autoPersistance = false)]
-		public string showButtonsTitle = "";
+		//[GameParameters.CustomStringParameterUI("showButtonsTitle",
+		//	title = "#LOC_PartInfoInPAW_Settings_ShowButtonsTitle",
+		//	toolTip = "#LOC_PartInfoInPAW_Settings_ShowButtonsTitle_Tooltip",
+		//	lines = 2,
+		//	autoPersistance = false)]
+		//public string showButtonsTitle = "";
 
 		[GameParameters.CustomParameterUI("#LOC_PartInfoInPAW_Settings_CopyPartName_ShowBtn",
 			toolTip = "#LOC_PartInfoInPAW_Settings_CopyPartName_ShowBtn_Tooltip",
@@ -89,6 +54,13 @@
 			autoPersistance = true)]
 		public bool showCopyOrigPartNodeBtn = false;
 
+
+		[GameParameters.CustomParameterUI("Use External Editor",
+			toolTip = "Open the configs in an external editor",
+			autoPersistance = true)]
+		public bool useExternalEditor = true;
+
+
 		[GameParameters.CustomParameterUI("#LOC_PartInfoInPAW_Settings_OpenPartCFGInEditor_ShowBtn",
 			toolTip = "#LOC_PartInfoInPAW_Settings_OpenPartCFGInEditor_ShowBtn_Tooltip",
 			autoPersistance = true)]
@@ -103,6 +75,84 @@
 			toolTip = "#LOC_PartInfoInPAW_Settings_ShowPartMMPatchesHistory_ShowBtn_Tooltip",
 			autoPersistance = true)]
 		public bool showPartMMPatchesHistoryBtn = true;
+
+			}
+
+
+	internal class PartInfoInPAWGameSettings_PartInfoInFlight : GameParameters.CustomParameterNode
+	{
+		public override string DisplaySection { get { return Section; } }
+
+		public override string Section { get { return "#LOC_PartInfoInPAW_Settings_Title"; } }
+
+		public override string Title { get { return "#LOC_PartInfoInPAW_Settings_PartInfo_TitleInFlight"; } }
+
+		public override int SectionOrder { get { return 1; } }
+
+		public override GameParameters.GameMode GameMode { get { return GameParameters.GameMode.ANY; } }
+
+		public override bool HasPresets { get { return false; } }
+
+
+		public override bool Enabled(System.Reflection.MemberInfo member, GameParameters parameters)
+		{
+			return true;
+		}
+
+		public override bool Interactible(System.Reflection.MemberInfo member, GameParameters parameters)
+		{
+			if (member.Name == "showCopyPartNodeBtn" || member.Name == "showOpenPartCFGInEditorBtn" || member.Name == "showPartMMPatchesHistoryBtn")
+				return PartInfoInPAW.IsModuleManagerPresent();
+			return true;
+		}
+
+
+
+		[GameParameters.CustomParameterUI("#LOC_PartInfoInPAW_Settings_ShowPartInfo",
+			toolTip = "#LOC_PartInfoInPAW_Settings_ShowPartInfo_Tooltip",
+			autoPersistance = true)]
+		public bool showPartInfoInFlight = true;
+
+		//[GameParameters.CustomStringParameterUI("showButtonsTitle",
+		//	title = "#LOC_PartInfoInPAW_Settings_ShowButtonsTitle",
+		//	toolTip = "#LOC_PartInfoInPAW_Settings_ShowButtonsTitle_Tooltip",
+		//	lines = 2,
+		//	autoPersistance = false)]
+		//public string showButtonsTitleInFlight = "";
+
+		[GameParameters.CustomParameterUI("#LOC_PartInfoInPAW_Settings_CopyPartName_ShowBtn",
+			toolTip = "#LOC_PartInfoInPAW_Settings_CopyPartName_ShowBtn_Tooltip",
+			autoPersistance = true)]
+		public bool showCopyPartNameBtnInFlight = true;
+
+		[GameParameters.CustomParameterUI("#LOC_PartInfoInPAW_Settings_CopyPartNode_ShowBtn" ,
+			toolTip = "#LOC_PartInfoInPAW_Settings_CopyPartNode_ShowBtn_Tooltip",
+			autoPersistance = true)]
+		public bool showCopyPartNodeBtnInFlight = false;
+
+		[GameParameters.CustomParameterUI("#LOC_PartInfoInPAW_Settings_CopyOrigPartNode_ShowBtn",
+			toolTip = "#LOC_PartInfoInPAW_Settings_CopyOrigPartNode_ShowBtn_Tooltip",
+			autoPersistance = true)]
+		public bool showCopyOrigPartNodeBtnInFlight = false;
+
+		[GameParameters.CustomParameterUI("#LOC_PartInfoInPAW_Settings_OpenPartCFGInEditor_ShowBtn",
+			toolTip = "#LOC_PartInfoInPAW_Settings_OpenPartCFGInEditor_ShowBtn_Tooltip",
+			autoPersistance = true)]
+		public bool showOpenPartCFGInEditorBtnInFlight = true;
+
+		[GameParameters.CustomParameterUI("#LOC_PartInfoInPAW_Settings_OpenOrigPartCFGInEditor_ShowBtn" ,
+			toolTip = "#LOC_PartInfoInPAW_Settings_OpenOrigPartCFGInEditor_ShowBtn_Tooltip",
+			autoPersistance = true)]
+		public bool showOpenOrigPartCFGInEditorBtnInFlight = true;
+
+		[GameParameters.CustomParameterUI("#LOC_PartInfoInPAW_Settings_ShowPartMMPatchesHistory_ShowBtn",
+			toolTip = "#LOC_PartInfoInPAW_Settings_ShowPartMMPatchesHistory_ShowBtn_Tooltip",
+			autoPersistance = true)]
+		public bool showPartMMPatchesHistoryBtnInFlight = true;
+
+
+
+		//public bool showInFlight = false;
 	}
 
 	internal class PartInfoInPAWGameSettings_EngineInfo : GameParameters.CustomParameterNode

@@ -21,6 +21,7 @@ namespace PartInfoInPAW
 			for (int i = 0; i < partsCount; i++)
 			{
 				AvailablePart part = PartLoader.LoadedPartsList[i];
+				if (part != null && !part.name.StartsWith("kerbalEVA") && !part.name.Equals("flag"))
 				if (part.partPrefab.GetComponents<ModulePartInfoInPAW>().Length == 0)
 				{
 					try

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using UnityEngine;
+using static PartInfoInPAW.PartInfoWindow.PartInfoWindow;
 
 namespace PartInfoInPAW
 {
@@ -120,8 +121,17 @@ namespace PartInfoInPAW
 			}
 		}
 
+		enum OpenLocation { Editor, Window };
+
 		[KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "#LOC_PartInfoInPAW_OpenPartCFGInEditor_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
 		public void OpenPartCFGInEditor()
+		{ OpenPartCfg(OpenLocation.Editor); }
+
+		[KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "#LOC_PartInfoInPAW_OpenPartCFGInWindow_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
+		public void OpenPartCFGInWindow()
+		{ OpenPartCfg(OpenLocation.Window); }
+
+		void OpenPartCfg(OpenLocation loc)
 		{
 			string partCFG;
 
@@ -159,7 +169,15 @@ namespace PartInfoInPAW
 					return;
 				}
 			}
-			Utils.ShellOpenFile(filePath);
+			switch (loc)
+			{
+				case OpenLocation.Editor:
+					Utils.ShellOpenFile(part, filePath);
+					break;
+				case OpenLocation.Window:
+					AddPartInfoWindow(part, filePath);
+					break;
+			}
 		}
 
 		[KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "#LOC_PartInfoInPAW_CopyOrigPartNode_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
@@ -183,7 +201,12 @@ namespace PartInfoInPAW
 		[KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "#LOC_PartInfoInPAW_OpenOrigPartCFGInEditor_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
 		public void OpenOrigPartCFGInEditor()
 		{
-			Utils.ShellOpenFile(part.GetPartFilePath());
+			Utils.ShellOpenFile(part, part.GetPartFilePath());
+		}
+		[KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "#LOC_PartInfoInPAW_OpenOrigPartCFGInWindow_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
+		public void OpenOrigPartCFGInWindow()
+		{
+			AddPartInfoWindow(part, part.GetPartFilePath());
 		}
 
 		[KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "#LOC_PartInfoInPAW_ShowPartMMPatchesHistory_Action", active = true, groupName = "partInfo", groupDisplayName = "#LOC_PartInfoInPAW_PartInfo_GroupTitle")]
@@ -218,19 +241,38 @@ namespace PartInfoInPAW
 			GameEvents.onEditorShipModified.Add(EditorShipModified);
 
 			PartInfoInPAWGameSettings_PartInfo settingsPartInfo = HighLogic.CurrentGame.Parameters.CustomParams<PartInfoInPAWGameSettings_PartInfo>();
+			PartInfoInPAWGameSettings_PartInfoInFlight settings_PartInfoInFlight = HighLogic.CurrentGame.Parameters.CustomParams<PartInfoInPAWGameSettings_PartInfoInFlight>();
 
-			Fields["partName"].guiActiveEditor = settingsPartInfo.showPartInfo;
-			Fields["partModName"].guiActiveEditor = settingsPartInfo.showPartInfo;
-			Fields["partMass"].guiActiveEditor = settingsPartInfo.showPartInfo;
-			Fields["partCost"].guiActiveEditor = settingsPartInfo.showPartInfo;
-			Fields["partEntryCost"].guiActiveEditor = settingsPartInfo.showPartInfo;
+
+			Fields["partName"].guiActive = Fields["partName"].guiActiveEditor = settingsPartInfo.showPartInfo;
+			Fields["partModName"].guiActive = Fields["partModName"].guiActiveEditor = settingsPartInfo.showPartInfo;
+			Fields["partMass"].guiActive = Fields["partMass"].guiActiveEditor = settingsPartInfo.showPartInfo;
+			Fields["partCost"].guiActive = Fields["partCost"].guiActiveEditor = settingsPartInfo.showPartInfo;
+			Fields["partEntryCost"].guiActive = Fields["partEntryCost"].guiActiveEditor = settingsPartInfo.showPartInfo;
 
 			Events["CopyPartName"].guiActiveEditor = settingsPartInfo.showCopyPartNameBtn;
+			Events["CopyPartName"].guiActive = settings_PartInfoInFlight.showCopyPartNameBtnInFlight;
+
 			Events["CopyPartConfigNode"].guiActiveEditor = settingsPartInfo.showCopyPartNodeBtn && PartInfoInPAW.IsModuleManagerPresent();
+			Events["CopyPartConfigNode"].guiActive = settings_PartInfoInFlight.showCopyPartNodeBtnInFlight && PartInfoInPAW.IsModuleManagerPresent();
+
 			Events["OpenPartCFGInEditor"].guiActiveEditor = settingsPartInfo.showOpenPartCFGInEditorBtn && PartInfoInPAW.IsModuleManagerPresent();
+			Events["OpenPartCFGInEditor"].guiActive = settings_PartInfoInFlight.showOpenPartCFGInEditorBtnInFlight && PartInfoInPAW.IsModuleManagerPresent();
+
+			Events["OpenPartCFGInWindow"].guiActiveEditor = settingsPartInfo.showOpenPartCFGInEditorBtn && PartInfoInPAW.IsModuleManagerPresent();
+			Events["OpenPartCFGInWindow"].guiActive = settings_PartInfoInFlight.showOpenPartCFGInEditorBtnInFlight && PartInfoInPAW.IsModuleManagerPresent();
+
 			Events["CopyOrigPartConfigNode"].guiActiveEditor = settingsPartInfo.showCopyOrigPartNodeBtn;
+			Events["CopyOrigPartConfigNode"].guiActive = settings_PartInfoInFlight.showCopyOrigPartNodeBtnInFlight;
+
 			Events["OpenOrigPartCFGInEditor"].guiActiveEditor = settingsPartInfo.showOpenOrigPartCFGInEditorBtn;
+			Events["OpenOrigPartCFGInEditor"].guiActive = settings_PartInfoInFlight.showOpenOrigPartCFGInEditorBtnInFlight;
+
+			Events["OpenOrigPartCFGInWindow"].guiActiveEditor = settingsPartInfo.showOpenOrigPartCFGInEditorBtn;
+			Events["OpenOrigPartCFGInWindow"].guiActive = settings_PartInfoInFlight.showOpenOrigPartCFGInEditorBtnInFlight;
+
 			Events["ShowMMPatchesHistory"].guiActiveEditor = settingsPartInfo.showPartMMPatchesHistoryBtn && PartInfoInPAW.IsModuleManagerPresent();
+			Events["ShowMMPatchesHistory"].guiActive = settings_PartInfoInFlight.showPartMMPatchesHistoryBtnInFlight && PartInfoInPAW.IsModuleManagerPresent();
 
 			partName = part.GetPartName();
 			partModName = GetPartModName();
@@ -244,7 +286,7 @@ namespace PartInfoInPAW
 		public override void OnUpdate()
 		{
 			// disabled in flight scene
-			isEnabled = false;
+			isEnabled = HighLogic.CurrentGame.Parameters.CustomParams<PartInfoInPAWGameSettings_PartInfoInFlight>().showPartInfoInFlight;
 		}
 
 		private void EditorShipModified(ShipConstruct construct)
@@ -254,11 +296,13 @@ namespace PartInfoInPAW
 
 		public void Update()
 		{
+#if false
 			if (!HighLogic.LoadedSceneIsEditor)
 			{
 				enabled = false;
 				return;
 			}
+#endif
 			// No UI update needed if PAW menu is not opened
 			if (part.PartActionWindow == null || !(part.PartActionWindow.isActiveAndEnabled))
 			{
@@ -277,7 +321,8 @@ namespace PartInfoInPAW
 
 		private bool needToUpdateCrewMassAndCost()
 		{
-			if (part.CrewCapacity <= 0) {
+			if (part.CrewCapacity <= 0)
+			{
 				return false;
 			}
 			if ((DateTime.UtcNow - lastCrewUpdate).TotalMilliseconds >= crewUpdateDelay)
