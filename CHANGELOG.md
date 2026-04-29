@@ -9,7 +9,8 @@ Changelog
 	In-game window also shows the FloatCurve graphs (not available in external editor)
 	Added ClickThroughBlocker as a dependency
 	Added Bulkhead Profiles to PAW
-	Updated russian config for new lines
+	Updated settings page to reflect new options
+	Updated english and russian config for new lines
 
 0.3.0
 - Added buttons "Open CFG node in editor" and "Open orig. CFG in editor" to PAW menu. Both buttons open corresponding file in system default editor for .cfg files.
