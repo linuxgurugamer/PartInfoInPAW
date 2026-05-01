@@ -241,13 +241,13 @@ namespace PartInfoInPAW.PartInfoWindow
 		private void OnGUI()
 		{
 			{
-				//if (!HighLogic.CurrentGame.Parameters.CustomParams<PartInfoSettings>().useAltSkin)
-				//{
-				//	GUI.skin = HighLogic.Skin;
-				//	bold = "<b>";
-				//	unbold = "</b>";
-				//}
-				//else
+				if (!HighLogic.CurrentGame.Parameters.CustomParams<PartInfoInPAWGameSettings_PartInfo>().useAltSkin)
+				{
+					GUI.skin = HighLogic.Skin;
+					bold = "<b>";
+					unbold = "</b>";
+				}
+				else
 				{
 					bold = "";
 					unbold = "";
@@ -335,10 +335,10 @@ namespace PartInfoInPAW.PartInfoWindow
 							cnt++;
 
 							int i1 = 0;
-							//if (!HighLogic.CurrentGame.Parameters.CustomParams<PartInfoSettings>().useAltSkin)
-							//	i1 = 110;
-							//else
-							i1 = 100;
+							if (!HighLogic.CurrentGame.Parameters.CustomParams<PartInfoInPAWGameSettings_PartInfo>().useAltSkin)
+								i1 = 110;
+							else
+								i1 = 100;
 
 							for (int j = 0; j < listStanzas[i].listFloatCurveGraph.Count; j++)
 							{

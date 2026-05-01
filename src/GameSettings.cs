@@ -21,12 +21,17 @@
 			return true;
 		}
 
+		[GameParameters.CustomParameterUI("Use alternate skin",
+			toolTip = "Use a more minimiliast skin, no color")]
+		public bool useAltSkin = true;
+
 
 		[GameParameters.CustomIntParameterUI("#LOC_PartInfoInPAW_Settings_TabIndentSizeTitle", toolTip = "#LOC_PartInfoInPAW_Settings_TabIndentSizeTooltip", minValue = 2, maxValue = 16, displayFormat = "0")]
 		public int spacesPerTab = 8;
 
 		[GameParameters.CustomStringParameterUI("#LOC_PartInfoInPAW_Settings_PartInfoTitle")]
 		public string advancedHeader1 = "";
+
 
 		[GameParameters.CustomParameterUI("#LOC_PartInfoInPAW_Settings_ShowPartInfo",
 			toolTip = "#LOC_PartInfoInPAW_Settings_ShowPartInfo_Tooltip",

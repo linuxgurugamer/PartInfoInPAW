@@ -1,5 +1,9 @@
 Changelog
 
+0.4.0.1
+	Updated name by adding  "Enhanced" to the name in the settings page
+
+
 0.4.0
 	Adoption by Linuxgurugamer
 	Added code to make available in flight.  If not set to be available in flight, will not affect performance (destorys itself)
