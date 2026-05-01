@@ -18,10 +18,10 @@ This feature is more or less identical to [PartInfo mod by linuxgurugamer](https
     * entry cost;
     * current and maximum crew (only for crewable parts).
 
-    ![Part info example](https://i.imgur.com/YEQNnRE.png)
+    ![Part info example](https://i.imgur.com/5N4SrSl.png)
 
     For engines, mod also display propellants information, thrust and ISP, minimum thrust (in %, and only if engine has non-zero minThrust) and engine gimbal information. If part has more than one ModuleEngines (for example, multi-mode engine like RAPIER), information for first two ModuleEngines will be displayed. RealFuels/RO, KSPIE and other engines are all supported.
-    ![Engines info example](https://i.imgur.com/OvDfYXS.png)
+    ![Engines info example](https://i.imgur.com/Wma6K4J.png)
 
 3. Mod adds several buttons to PAW menu:
     * **Copy part name** - copy part name (ID) to clipboard;
@@ -39,7 +39,6 @@ This feature is more or less identical to [PartInfo mod by linuxgurugamer](https
 
 ## No dependencies
 
-As of version 0.3.0, PartInfoInPAW no longer relies on module manager patch for adding itself to every part. Instead, mod do so automatically during KSP startup.
 
 ## Supported KSP versions
 
