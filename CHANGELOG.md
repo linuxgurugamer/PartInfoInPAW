@@ -2,16 +2,16 @@ Changelog
 
 0.4.0.1
 	Updated name by adding  "Enhanced" to the name in the settings page
-
+	If available, the ClickThroughBlocker will be used, if not, then it will just use the standard window
+	Updated README.md
 
 0.4.0
 	Adoption by Linuxgurugamer
-	Added code to make available in flight.  If not set to be available in flight, will not affect performance (destorys itself)
+	Added code to make available in flight.  If not set to be available in flight, will not affect performance (destroys itself)
 	Added options to settings to enable/disable individual items in flight, exactly as done in the editor
 	Fixed errors when trying to add mode to parts beginning with KerbalEVA or a flag
 	Added ability to show files in window in-game in addition to or instead of an external editor
 	In-game window also shows the FloatCurve graphs (not available in external editor)
-	Added ClickThroughBlocker as a dependency
 	Added Bulkhead Profiles to PAW
 	Updated settings page to reflect new options
 	Updated english and russian config for new lines

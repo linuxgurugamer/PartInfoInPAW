@@ -7,6 +7,7 @@ Get useful information about part from PAW menu (including full module manager p
 
 1. It displays part name (basically, part ID) and path to part CFG file in the parts list (in VAB/Hangar):
 ![PartInfoInPAW GetInfo](https://i.imgur.com/x889rHz.png)
+1. https://i.imgur.com/Nqyw5Sk.png
 This feature is more or less identical to [PartInfo mod by linuxgurugamer](https://forum.kerbalspaceprogram.com/index.php?/topic/182040-*).
 
 2. PartInfoInPAW also adds some information to PAW menu (right-click menu) for alls parts (works in VAB/SPH and in flight).
@@ -35,7 +36,7 @@ This feature is more or less identical to [PartInfo mod by linuxgurugamer](https
     ![MM patches history](https://i.imgur.com/o9CXClM.png)
 
 4. All buttons and information options are configurable in game difficulty settings. Choose which options you want to see in PAW menu.
-![Settings](https://i.imgur.com/ZJF09LX.png)
+![Settings](https://imgur.com/a1cCNS4)
 
 ## No dependencies
 

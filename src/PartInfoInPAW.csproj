@@ -48,6 +48,7 @@
     <Compile Include="MMPatchesParser\MMLogParser.cs" />
     <Compile Include="MMPatchesParser\MMPatchesUtils.cs" />
     <Compile Include="MMPatchesParser\MMPatchInfo.cs" />
+    <Compile Include="PartInfoWindow\CBTWrapper.cs" />
     <Compile Include="PartInfoWindow\FloatCurveGraph.cs" />
     <Compile Include="PartInfoWindow\KspPartStanzaReader.cs" />
     <Compile Include="PartInfoWindow\PartInfoWindow.cs" />

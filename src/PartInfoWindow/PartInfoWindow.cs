@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using static KSP.UI.Screens.Settings.SettingsSetup;
 
 namespace PartInfoInPAW.PartInfoWindow
 {
@@ -238,6 +239,8 @@ namespace PartInfoInPAW.PartInfoWindow
 
 		}
 
+
+
 		private void OnGUI()
 		{
 			{
@@ -253,7 +256,10 @@ namespace PartInfoInPAW.PartInfoWindow
 					unbold = "";
 				}
 
-				winRect = ClickThruBlocker.GUILayoutWindow((int)part.persistentId * 10, winRect, Window, "Part Information");
+				//winRect = ClickThruBlocker.GUILayoutWindow((int)part.persistentId * 10, winRect, Window, "Part Information");
+
+				winRect = CBTWrapper.GUILayoutWindow(
+					(int)part.persistentId * 10, winRect, Window, "Part Information"); 
 			}
 		}
 
