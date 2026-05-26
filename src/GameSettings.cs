@@ -21,10 +21,8 @@
 			return true;
 		}
 
-		[GameParameters.CustomParameterUI("Use alternate skin",
-			toolTip = "Use a more minimiliast skin, no color")]
+		[GameParameters.CustomParameterUI("#LOC_PartInfoInPAW_Settings_UseAlternateSkin", toolTip = "#LOC_PartInfoInPAW_Settings_UseAlternateSkinTooltip")]
 		public bool useAltSkin = true;
-
 
 		[GameParameters.CustomIntParameterUI("#LOC_PartInfoInPAW_Settings_TabIndentSizeTitle", toolTip = "#LOC_PartInfoInPAW_Settings_TabIndentSizeTooltip", minValue = 2, maxValue = 16, displayFormat = "0")]
 		public int spacesPerTab = 8;
