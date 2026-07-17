@@ -1,5 +1,11 @@
 Changelog
 
+0.4.0.2
+	Thanks to github user infradmin4KSP for these fixes:
+		Added localization lines to one string in the settings that was lacking it (Use alternate skin).
+		Fixed mistype in parameter name in ru.cfg that resulted in another line missing localization in the settings,
+		Enhanced few strings in Russian localization.
+
 0.4.0.1
 	Updated name by adding  "Enhanced" to the name in the settings page
 	If available, the ClickThroughBlocker will be used, if not, then it will just use the standard window
